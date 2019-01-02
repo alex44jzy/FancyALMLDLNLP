@@ -1,5 +1,6 @@
 # Python 刷Leetcode包含思路题解，每日一题
-<br>
+
+
 ## Leetcode-70 爬楼梯问题（DP）
 > You are climbing a stair case. It takes n steps to reach to the top.
 Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?
@@ -96,7 +97,7 @@ class Solution(object):
 ```
 比较简单和基础的一道题，以上
 
-<br>
+
 ## leetcode-242 重排校验
 > Given two strings s and t , write a function to determine if t is an anagram of s.
 Example 1:
@@ -130,7 +131,8 @@ class Solution:
         """
         return Counter(s) == Counter(t)
 ```
-<br>
+
+
 ## leetcode-104 二叉树最大深度
 > Given a binary tree, find its maximum depth.
 The maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.
@@ -158,7 +160,7 @@ class Solution:
             right_height = self.maxDepth(root.right)
             return max(left_height, right_height) + 1
 ```
-<br>
+
 
 ## leetcode-160 链表交集
 > Write a program to find the node at which the intersection of two singly linked lists begins.
@@ -235,7 +237,8 @@ class Solution(object):
             q = headA if q is None else q.next
         return p
 ```
-<br>
+
+
 ## Leetcode-204 质数个数
 > Count the number of prime numbers less than a non-negative number, n.
 Example:
