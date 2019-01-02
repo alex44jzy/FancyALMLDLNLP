@@ -120,7 +120,7 @@ class Solution:
         return origin == current
 ```
 另外就是可以尝试一下Counter这种计数器的方法。虽然这个方法挺不要脸的，利用Counter直接生成一个hashmap。
-```
+```python
 from collections import Counter
 class Solution:
     def isAnagram(self, s, t):
