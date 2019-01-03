@@ -303,11 +303,15 @@ def countPrimes(self, n):
 ## Leetcode-17 Letter Combinations of a Phone Number 字母组合
 > Given a string containing digits from 2-9 inclusive, return all possible letter combinations that the number could represent.
 A mapping of digit to letters (just like on the telephone buttons) is given below. Note that 1 does not map to any letters.
+
+> Input: "23"
+Output: ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"].
+
 其中按键对应的字母映射要自己建一个dictionary，汗。。。如下：
+
 (letters = {'2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl', 
                    '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'})
-Input: "23"
-Output: ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"].
+
 
 这个题乍一看，典型的递归，深度遍历的长相，于是乎，开始写了起来，毕竟是递归嘛，脑子大概想着要有一个重复子问题。也差不多想到了就是每一次迭代都要拿上一次的结果，拼接上新一次的字母，而且这个拼接要是一个组合，所以总体来说规模是要逐步扩大的。因此，既然要扩大，应该是在for循环里套一层递归的大概样子。写了一个大概的版本，尽然AC了。。。猝不及防
 ```python
