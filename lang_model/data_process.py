@@ -1,7 +1,5 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-
+import os
+import io
 try:  # Use the default NLTK tokenizer.
     from nltk import word_tokenize, sent_tokenize
 
@@ -19,23 +17,19 @@ except:  # Use a naive sentence tokenizer and toktok.
     word_tokenize = word_tokenize = toktok.tokenize
 
 
-def tokenize(lines):
+def tokenize(text):
     END = '</s>'
-    sents = [str.lower(str(line)).split() + [END] for line in lines]
-    return sents
+    tokenized_text = [list(map(str.lower, word_tokenize(sent) + [END])) for sent in sent_tokenize(text)]
+    return tokenized_text
 
 
 # TODO just pick the top 200 sentences
 def readin(path):
-    list_lines = []
-    with open(path, 'r', encoding='utf-8') as f:
-        for line in f:
-            if len(line.strip()) == 0:  # 过滤空的行
-                continue
-            words = line.split() + ['</s>']
-            # if 20 < len(words) < 500:
-            list_lines.append(line)
-    return list_lines[:100]
+    if os.path.isfile(path):
+        with io.open(path, encoding='utf8') as fin:
+            text = fin.read()
+    text = text.replace('\n', ' ')
+    return text
 
 
 def construct_input_output(sents):
@@ -48,10 +42,10 @@ def process(path):
     list_of_lines = readin(path)
     lines_tokens = tokenize(list_of_lines)
     input, output = construct_input_output(lines_tokens)
+    print("Total sentences number is %d" % len(input))
     return input, output
 
 
 if __name__ == '__main__':
     path = './data/hamlet.txt'
     lines = process(path)
-    print(lines)

@@ -1,5 +1,5 @@
 path = './data/hamlet.txt'
-batch_size = 45
+batch_size = 50
 embed_size = 300
 hidden_size = 1024
 num_layers = 2
