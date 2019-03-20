@@ -96,7 +96,7 @@ def train():
         config.dropout_p
     )
 
-    model.to(device)
+    model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
 
     train_loss = []
@@ -137,5 +137,6 @@ def train():
 
 if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    print(device)
     path = './data/hamlet.txt'
     loss_list, acc_list = train()
