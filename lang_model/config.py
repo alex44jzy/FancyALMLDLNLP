@@ -1,9 +1,9 @@
 path = './data/hamlet.txt'
-batch_size = 10
-embed_size = 128
-hidden_size = 512
+batch_size = 45
+embed_size = 300
+hidden_size = 1024
 num_layers = 2
-dropout_p = 0.5
-num_epochs = 5
+dropout_p = 0.2
+num_epochs = 50
 learning_rate = 0.003
 mask_index = 0
