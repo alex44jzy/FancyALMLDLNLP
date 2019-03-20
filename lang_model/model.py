@@ -14,7 +14,7 @@ class RNNLM(nn.Module):
         # Embed word ids to vectors
         x = self.embed(x)
         # Forward propagate LSTM
-        out, h_ = self.lstm(x, h)
+        out, h = self.lstm(x, h)
         batch_size, seq_size, hidden_size = out.shape
 
         # Reshape output to (batch_size*sequence_length, hidden_size)
@@ -24,4 +24,4 @@ class RNNLM(nn.Module):
         out = self.fc(F.dropout(out, p=self._dropout_p))
         out_feat = out.shape[-1]
         out = out.view(batch_size, seq_size, out_feat)
-        return out, h_
+        return out, h

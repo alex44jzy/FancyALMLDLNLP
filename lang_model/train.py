@@ -7,17 +7,28 @@ from torch import nn, optim, tensor
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
+import config
 import math
+
+
+def get_dataset(path):
+    input_sents, output_sents = process(path)
+    lang_dataset = LangDataset(input_sents, output_sents)
+    return lang_dataset
+
+
+def get_dataset_input_output(path):
+    input_sents, output_sents = process(path)
+    lang_dataset = LangDataset(input_sents, output_sents)
+    return lang_dataset, input_sents, output_sents
 
 
 def get_dataset_dataloader(path, batch_size):
     print("Start load data .................")
     # read in data
-    input_sents, output_sents = process(path)
-    print("Load data finished ..............")
-
-    lang_dataset = LangDataset(input_sents, output_sents)
+    lang_dataset, input_sents, output_sents = get_dataset_input_output(path)
     dataloader = DataLoader(dataset=lang_dataset, batch_size=batch_size, shuffle=False)
+    print("Load data finished ..............")
     return lang_dataset, dataloader, input_sents, output_sents
 
 
@@ -29,7 +40,7 @@ def normalize_sizes(y_pred, y_true):
     return y_pred, y_true
 
 
-def compute_accuracy(y_pred, y_true, mask_index):
+def compute_accuracy(y_pred, y_true, mask_index=0):
     y_pred, y_true = normalize_sizes(y_pred, y_true)
 
     _, y_pred_indices = y_pred.max(dim=1)
@@ -44,15 +55,15 @@ def compute_accuracy(y_pred, y_true, mask_index):
 
 
 # TODO: add the mask to be ignored
-def sequence_loss(y_pred, y_true):
+def sequence_loss(y_pred, y_true, mask_index=0):
     y_pred, y_true = normalize_sizes(y_pred, y_true)
     return F.cross_entropy(y_pred, y_true, ignore_index=mask_index)
 
 
 def generate(model, dataset, input_word, word_len=100, temperature=1.0):
     model.eval()
-    hidden = (Variable(torch.zeros(num_layers, 1, hidden_size)).to(device),
-              Variable(torch.zeros(num_layers, 1, hidden_size)).to(device))  # batch_size为1
+    hidden = (Variable(torch.zeros(config.num_layers, 1, config.hidden_size)).to(device),
+              Variable(torch.zeros(config.num_layers, 1, config.hidden_size)).to(device))  # batch_size为1
     start_idx = dataset.vectorize(dataset.vocab, [input_word])
     input_tensor = torch.stack([start_idx] * 1)
     input = input_tensor.to(device)
@@ -74,19 +85,27 @@ def generate(model, dataset, input_word, word_len=100, temperature=1.0):
 
 def train():
     lang_dataset, dataloader, input_sents, output_sents = \
-        get_dataset_dataloader(path, batch_size)
+        get_dataset_dataloader(path, config.batch_size)
     vocab_size = len(lang_dataset.vocab)
 
-    model = RNNLM(vocab_size, embed_size, hidden_size, num_layers)
+    model = RNNLM(
+        vocab_size,
+        config.embed_size,
+        config.hidden_size,
+        config.num_layers,
+        config.dropout_p
+    )
+
     model.to(device)
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
 
     train_loss = []
     train_acc = []
-
-    for epoch in range(num_epochs):
-        states = (Variable(torch.zeros(num_layers, batch_size, hidden_size)).to(device),
-                  Variable(torch.zeros(num_layers, batch_size, hidden_size)).to(device))
+    # initialize the loss
+    best_loss = 9999999.0
+    for epoch in range(config.num_epochs):
+        states = (Variable(torch.zeros(config.num_layers, config.batch_size, config.hidden_size)).to(device),
+                  Variable(torch.zeros(config.num_layers, config.batch_size, config.hidden_size)).to(device))
 
         running_loss = 0.0
         running_acc = 0.0
@@ -102,12 +121,15 @@ def train():
             loss.backward(retain_graph=True)
             optimizer.step()
             running_loss += (loss.item() - running_loss) / batch_index
-            acc_t = compute_accuracy(y_pred, y, mask_index)
+            acc_t = compute_accuracy(y_pred, y)
             running_acc += (acc_t - running_acc) / (batch_index + 1)
         print('Epoch = %d, Train loss = %f, Train accuracy = %f, Train perplexity = %f' % (
             epoch, running_loss, running_acc, math.exp(running_loss)))
         train_loss.append(running_loss)
         train_acc.append(running_acc)
+        if running_loss < best_loss:
+            torch.save(model, './model_save/best_model_epoch%d_loss_%f.pth' % (epoch, loss))
+            best_loss = running_loss
         print(' '.join(generate(model, lang_dataset, 'the')))
 
     return train_loss, train_acc
@@ -115,13 +137,5 @@ def train():
 
 if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    path = './data/wiki.train.tokens'
-    batch_size = 40
-    embed_size = 128
-    hidden_size = 512
-    num_layers = 2
-    dropout_p = 0.1
-    num_epochs = 5
-    learning_rate = 0.003
-    mask_index = 0
+    path = './data/hamlet.txt'
     loss_list, acc_list = train()

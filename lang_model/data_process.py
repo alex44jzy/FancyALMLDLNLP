@@ -30,10 +30,12 @@ def readin(path):
     list_lines = []
     with open(path, 'r', encoding='utf-8') as f:
         for line in f:
+            if len(line.strip()) == 0:  # 过滤空的行
+                continue
             words = line.split() + ['</s>']
-            if 20 < len(words) < 500:
-                list_lines.append(line)
-    return list_lines[:200]
+            # if 20 < len(words) < 500:
+            list_lines.append(line)
+    return list_lines[:100]
 
 
 def construct_input_output(sents):
@@ -50,5 +52,6 @@ def process(path):
 
 
 if __name__ == '__main__':
-    path = './data/wiki.train.tokens'
-    process(path)
+    path = './data/hamlet.txt'
+    lines = process(path)
+    print(lines)
